@@ -1,0 +1,11 @@
+[
+  { "id": "haberglobal", "name": "Haber Global", "channelId": "UC4QHvZjB2N5Ock4FtX0H0lA" },
+  { "id": "ntv",         "name": "NTV",          "channelId": "UCqgjJ-jXk6_s2QQ_RyAOFFA" },
+  { "id": "cnnturk",     "name": "CNN Türk",     "channelId": "UCx_PEnNcOMzMQHcKvA1q43w" },
+  { "id": "ahaber",      "name": "A Haber",      "channelId": "UCoaWoEoUNHWMpkDtsoJoLpA" },
+  { "id": "trthaber",    "name": "TRT Haber",    "channelId": "UC7fWeaHhqgM4Ry-RMpM2YYw" },
+  { "id": "haberturk",   "name": "Habertürk",    "channelId": "UCmkxoq2qPj-DwbqLVKuQTiQ" },
+  { "id": "sozcutv",     "name": "Sözcü TV",     "channelId": "UC_DbZukcKVUq-tUhVrjbX2A" },
+  { "id": "tgrt",        "name": "TGRT Haber",   "channelId": "UCV4UK9BK0CeqEMHrTRZAJyA" },
+  { "id": "halktv",      "name": "Halk TV",      "channelId": "UC8e3_TmgQz4nXc8eRcEA4Pw" }
+]

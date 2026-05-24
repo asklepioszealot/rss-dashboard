@@ -1,0 +1,11 @@
+{
+  "name": "rss-dashboard-server",
+  "version": "0.1.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node main.js",
+    "dev": "node --watch main.js"
+  },
+  "_note": "Dependencies kök package.json'da; Node resolution upward search ile bulur. Electron-builder bundle'ı kök node_modules'tan alır."
+}
