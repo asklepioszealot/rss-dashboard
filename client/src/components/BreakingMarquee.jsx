@@ -1,17 +1,20 @@
 import { useEffect, useState } from 'react';
 
 const POLL_MS = 30_000;
-// son dakika ağırlıklı kaynaklar
-const PRIORITY_SOURCES = 'ntv,cumhuriyet,haberturk,cnnturk';
 
-export default function BreakingMarquee() {
+export default function BreakingMarquee({ breakingSources = [] }) {
   const [items, setItems] = useState([]);
+  const sourcesKey = breakingSources.join(',');
 
   useEffect(() => {
+    if (!sourcesKey) {
+      setItems([]);
+      return;
+    }
     let alive = true;
     const load = async () => {
       try {
-        const r = await fetch(`/api/rss?sources=${PRIORITY_SOURCES}`);
+        const r = await fetch(`/api/rss?sources=${sourcesKey}`);
         const data = await r.json();
         if (alive) setItems((data.items || []).slice(0, 20));
       } catch {
@@ -21,7 +24,7 @@ export default function BreakingMarquee() {
     load();
     const t = setInterval(load, POLL_MS);
     return () => { alive = false; clearInterval(t); };
-  }, []);
+  }, [sourcesKey]);
 
   const hasItems = items.length > 0;
 
@@ -44,7 +47,11 @@ export default function BreakingMarquee() {
               </a>
             ))
           ) : (
-            <span>Son dakika haberleri yükleniyor…</span>
+            <span>
+              {sourcesKey
+                ? 'Son dakika haberleri yükleniyor…'
+                : 'Son dakika için kaynak işaretlenmedi (Ayarlar → 🔴)'}
+            </span>
           )}
         </div>
       </div>

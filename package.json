@@ -1,6 +1,6 @@
 {
   "name": "rss-dashboard",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "private": true,
   "description": "Yayıncı tarzı RSS haber komuta merkezi (Electron masaüstü uygulaması)",
   "main": "electron/main.cjs",
@@ -36,6 +36,7 @@
       "electron/**/*",
       "server/index.js",
       "server/main.js",
+      "server/sourcesState.js",
       "server/routes/**/*",
       "server/sources.json",
       "server/channels.json",

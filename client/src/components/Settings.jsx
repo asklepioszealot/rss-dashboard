@@ -4,29 +4,40 @@ import VersionTag from './VersionTag.jsx';
 
 const GRID_OPTIONS = [4, 6, 9, 10, 13, 16, 18, 21, 25];
 
-function makeId() {
-  return `ch-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+function makeId(prefix = 'ch') {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 }
 
-function normalize(list) {
+function normalizeChannels(list) {
   return (list || []).map((c) => ({
-    id: c.id || makeId(),
+    id: c.id || makeId('ch'),
     name: c.name || '',
     source: c.source || c.channelId || '',
   }));
 }
 
-export default function Settings({ settings, onChange, onClose }) {
+function isValidUrl(s) {
+  return /^https?:\/\/.+/i.test(String(s || '').trim());
+}
+
+export default function Settings({
+  settings,
+  sources,
+  onChange,
+  onSourcesChange,
+  onSourcesReset,
+  onClose,
+}) {
   const [defaultChannels, setDefaultChannels] = useState([]);
-  const [sources, setSources] = useState([]);
   const [autostart, setAutostart] = useState(false);
+  const [discoverUrl, setDiscoverUrl] = useState('');
+  const [discoverState, setDiscoverState] = useState({ status: 'idle', feeds: [], error: null });
 
   useEffect(() => {
     fetch('/api/channels')
       .then((r) => r.json())
-      .then((d) => setDefaultChannels(normalize(d)))
+      .then((d) => setDefaultChannels(normalizeChannels(d)))
       .catch(() => {});
-    fetch('/api/sources').then((r) => r.json()).then(setSources).catch(() => {});
     window.electron?.getLoginItemSettings?.().then((v) => setAutostart(!!v));
   }, []);
 
@@ -35,23 +46,15 @@ export default function Settings({ settings, onChange, onClose }) {
     await window.electron?.setLoginItemSettings?.(next);
   };
 
+  // --- Channels ---
   const channels = settings.customChannels
-    ? normalize(settings.customChannels)
+    ? normalizeChannels(settings.customChannels)
     : defaultChannels;
 
-  const commitChannels = (next) => {
-    onChange({ ...settings, customChannels: next });
-  };
-
-  const updateChannel = (idx, patch) => {
-    const next = channels.map((c, i) => (i === idx ? { ...c, ...patch } : c));
-    commitChannels(next);
-  };
-
-  const removeChannel = (idx) => {
-    commitChannels(channels.filter((_, i) => i !== idx));
-  };
-
+  const commitChannels = (next) => onChange({ ...settings, customChannels: next });
+  const updateChannel = (idx, patch) =>
+    commitChannels(channels.map((c, i) => (i === idx ? { ...c, ...patch } : c)));
+  const removeChannel = (idx) => commitChannels(channels.filter((_, i) => i !== idx));
   const moveChannel = (idx, dir) => {
     const target = idx + dir;
     if (target < 0 || target >= channels.length) return;
@@ -59,15 +62,34 @@ export default function Settings({ settings, onChange, onClose }) {
     [next[idx], next[target]] = [next[target], next[idx]];
     commitChannels(next);
   };
+  const addChannel = () =>
+    commitChannels([...channels, { id: makeId('ch'), name: '', source: '' }]);
+  const resetChannels = () => onChange({ ...settings, customChannels: null });
 
-  const addChannel = () => {
-    commitChannels([...channels, { id: makeId(), name: '', source: '' }]);
+  // --- Sources (editor + breaking/feed/notify toggles) ---
+  const updateSource = (idx, patch) =>
+    onSourcesChange(sources.map((s, i) => (i === idx ? { ...s, ...patch } : s)));
+  const removeSource = (idx) => onSourcesChange(sources.filter((_, i) => i !== idx));
+  const moveSource = (idx, dir) => {
+    const target = idx + dir;
+    if (target < 0 || target >= sources.length) return;
+    const next = [...sources];
+    [next[idx], next[target]] = [next[target], next[idx]];
+    onSourcesChange(next);
+  };
+  const addSource = (preset = {}) => {
+    onSourcesChange([
+      ...sources,
+      {
+        id: makeId('src'),
+        name: preset.name || '',
+        url: preset.url || '',
+        breaking: false,
+      },
+    ]);
   };
 
-  const resetChannels = () => {
-    onChange({ ...settings, customChannels: null });
-  };
-
+  // Feed filter (NewsFeed gösterimi)
   const toggleSource = (id) => {
     const allIds = sources.map((s) => s.id);
     const current = settings.selectedSources == null ? allIds : settings.selectedSources;
@@ -76,28 +98,54 @@ export default function Settings({ settings, onChange, onClose }) {
       : [...current, id];
     onChange({ ...settings, selectedSources: next });
   };
-
   const isSourceOn = (id) => {
     const list = settings.selectedSources;
     if (list == null) return true;
     return list.includes(id);
   };
 
-  const DEFAULT_NOTIFY = ['ntv', 'cumhuriyet', 'haberturk', 'cnnturk'];
-
+  // Notify filter (Electron native notification)
+  const defaultNotifyIds = sources.filter((s) => s.breaking).map((s) => s.id);
   const toggleNotify = (id) => {
-    const current =
-      settings.notifySources == null ? DEFAULT_NOTIFY : settings.notifySources;
+    const current = settings.notifySources == null ? defaultNotifyIds : settings.notifySources;
     const next = current.includes(id)
       ? current.filter((x) => x !== id)
       : [...current, id];
     onChange({ ...settings, notifySources: next });
   };
-
   const isNotifyOn = (id) => {
     const list = settings.notifySources;
-    if (list == null) return DEFAULT_NOTIFY.includes(id);
+    if (list == null) return defaultNotifyIds.includes(id);
     return list.includes(id);
+  };
+
+  // --- Auto-discover ---
+  const handleDiscover = async () => {
+    const u = discoverUrl.trim();
+    if (!isValidUrl(u)) {
+      setDiscoverState({ status: 'error', feeds: [], error: 'http(s)://... bekleniyor' });
+      return;
+    }
+    setDiscoverState({ status: 'loading', feeds: [], error: null });
+    try {
+      const r = await fetch(`/api/discover?url=${encodeURIComponent(u)}`);
+      const data = await r.json();
+      if (!r.ok) {
+        setDiscoverState({ status: 'error', feeds: [], error: data.error || `HTTP ${r.status}` });
+        return;
+      }
+      setDiscoverState({ status: 'done', feeds: data.feeds || [], error: null });
+    } catch (err) {
+      setDiscoverState({ status: 'error', feeds: [], error: err.message });
+    }
+  };
+
+  const addFromDiscover = (feed) => {
+    let host = '';
+    try { host = new URL(feed.url).hostname.replace(/^www\./, ''); } catch { /* skip */ }
+    addSource({ name: feed.title || host || '', url: feed.url });
+    setDiscoverState({ status: 'idle', feeds: [], error: null });
+    setDiscoverUrl('');
   };
 
   const quitApp = () => {
@@ -144,22 +192,8 @@ export default function Settings({ settings, onChange, onClose }) {
                   style={{ opacity: inGrid ? 1 : 0.45 }}
                 >
                   <div className="ch-move">
-                    <button
-                      type="button"
-                      onClick={() => moveChannel(idx, -1)}
-                      disabled={idx === 0}
-                      title="yukarı"
-                    >
-                      ▲
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => moveChannel(idx, +1)}
-                      disabled={idx === channels.length - 1}
-                      title="aşağı"
-                    >
-                      ▼
-                    </button>
+                    <button type="button" onClick={() => moveChannel(idx, -1)} disabled={idx === 0} title="yukarı">▲</button>
+                    <button type="button" onClick={() => moveChannel(idx, +1)} disabled={idx === channels.length - 1} title="aşağı">▼</button>
                   </div>
                   <input
                     type="text"
@@ -176,23 +210,14 @@ export default function Settings({ settings, onChange, onClose }) {
                     onChange={(e) => updateChannel(idx, { source: e.target.value })}
                     title={parsed.error || `${parsed.type}: ${parsed.value}`}
                   />
-                  <button
-                    type="button"
-                    className="ch-del"
-                    onClick={() => removeChannel(idx)}
-                    title="sil"
-                  >
-                    ×
-                  </button>
+                  <button type="button" className="ch-del" onClick={() => removeChannel(idx)} title="sil">×</button>
                 </div>
               );
             })}
           </div>
           <div className="channel-actions">
             <button type="button" onClick={addChannel}>+ Yeni Kanal Ekle</button>
-            <button type="button" onClick={resetChannels} title="varsayılan listeyi geri yükle">
-              ↺ Sıfırla
-            </button>
+            <button type="button" onClick={resetChannels} title="varsayılan listeyi geri yükle">↺ Sıfırla</button>
           </div>
           <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-dim)' }}>
             Kabul: <code>UC…</code> channel ID, 11 karakter video ID, YouTube URL veya
@@ -202,67 +227,116 @@ export default function Settings({ settings, onChange, onClose }) {
 
         <section>
           <h3>RSS Kaynakları</h3>
-          {sources.length === 0 && (
-            <div style={{ color: 'var(--text-dim)', fontSize: 12 }}>yükleniyor…</div>
+
+          <div className="source-discover">
+            <input
+              type="text"
+              placeholder="Site URL'i (örn. https://www.bbc.com) → otomatik feed bul"
+              value={discoverUrl}
+              onChange={(e) => setDiscoverUrl(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleDiscover(); }}
+            />
+            <button
+              type="button"
+              onClick={handleDiscover}
+              disabled={discoverState.status === 'loading'}
+            >
+              {discoverState.status === 'loading' ? '…' : 'Bul'}
+            </button>
+          </div>
+          {discoverState.status === 'done' && discoverState.feeds.length === 0 && (
+            <div className="source-discover-msg">⚠ Feed bulunamadı</div>
           )}
-          {sources.length > 0 && (
-            <>
-              <div className="source-actions">
-                <span className="source-actions-label">Feed:</span>
-                <button
-                  type="button"
-                  onClick={() => onChange({ ...settings, selectedSources: null })}
-                >
-                  ✓ Hepsi
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onChange({ ...settings, selectedSources: [] })}
-                >
-                  × Hiçbiri
-                </button>
-              </div>
-              <div className="source-actions">
-                <span className="source-actions-label">🔔 Bildirim:</span>
-                <button
-                  type="button"
-                  onClick={() => onChange({ ...settings, notifySources: sources.map((s) => s.id) })}
-                >
-                  ✓ Hepsi
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onChange({ ...settings, notifySources: [] })}
-                >
-                  × Hiçbiri
-                </button>
-              </div>
-            </>
+          {discoverState.status === 'error' && (
+            <div className="source-discover-msg error">⚠ {discoverState.error}</div>
           )}
-          {sources.map((s) => (
-            <div key={s.id} className="source-row">
-              <label className="source-feed">
-                <input
-                  type="checkbox"
-                  checked={isSourceOn(s.id)}
-                  onChange={() => toggleSource(s.id)}
-                />
-                {s.name}{' '}
-                <span style={{ color: 'var(--text-dim)', fontSize: 11 }}>· {s.category}</span>
-              </label>
-              <label className="source-notify" title="bu kaynaktan bildirim al">
-                <input
-                  type="checkbox"
-                  checked={isNotifyOn(s.id)}
-                  onChange={() => toggleNotify(s.id)}
-                />
-                🔔
-              </label>
+          {discoverState.status === 'done' && discoverState.feeds.length > 0 && (
+            <div className="source-discover-results">
+              {discoverState.feeds.map((f, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className="source-discover-feed"
+                  onClick={() => addFromDiscover(f)}
+                  title={f.url}
+                >
+                  + {f.title || f.url}
+                </button>
+              ))}
             </div>
-          ))}
+          )}
+
+          <div className="source-editor">
+            <div className="source-row source-row-header">
+              <span style={{ width: 32 }}></span>
+              <span title="son dakika (üst şeritte göster)" style={{ width: 24, textAlign: 'center' }}>🔴</span>
+              <span style={{ flex: '1 1 90px' }}>ad</span>
+              <span style={{ flex: '2 1 180px' }}>RSS URL</span>
+              <span title="feed'de göster" style={{ width: 22, textAlign: 'center' }}>✓</span>
+              <span title="bildirim al" style={{ width: 22, textAlign: 'center' }}>🔔</span>
+              <span style={{ width: 22 }}></span>
+            </div>
+            {sources.length === 0 && (
+              <div style={{ color: 'var(--text-dim)', fontSize: 12, padding: '4px 0' }}>
+                yükleniyor…
+              </div>
+            )}
+            {sources.map((s, idx) => {
+              const urlOk = isValidUrl(s.url);
+              return (
+                <div className="source-row" key={s.id}>
+                  <div className="ch-move">
+                    <button type="button" onClick={() => moveSource(idx, -1)} disabled={idx === 0} title="yukarı">▲</button>
+                    <button type="button" onClick={() => moveSource(idx, +1)} disabled={idx === sources.length - 1} title="aşağı">▼</button>
+                  </div>
+                  <button
+                    type="button"
+                    className={`breaking-toggle ${s.breaking ? 'on' : ''}`}
+                    onClick={() => updateSource(idx, { breaking: !s.breaking })}
+                    title="son dakika (marquee'de göster)"
+                  >
+                    🔴
+                  </button>
+                  <input
+                    type="text"
+                    className="src-name"
+                    placeholder="ad"
+                    value={s.name}
+                    onChange={(e) => updateSource(idx, { name: e.target.value })}
+                  />
+                  <input
+                    type="text"
+                    className={`src-url ${urlOk ? 'valid' : s.url ? 'invalid' : ''}`}
+                    placeholder="https://…/rss"
+                    value={s.url}
+                    onChange={(e) => updateSource(idx, { url: e.target.value })}
+                  />
+                  <input
+                    type="checkbox"
+                    className="src-check"
+                    checked={isSourceOn(s.id)}
+                    onChange={() => toggleSource(s.id)}
+                    title="feed'de göster"
+                  />
+                  <input
+                    type="checkbox"
+                    className="src-check"
+                    checked={isNotifyOn(s.id)}
+                    onChange={() => toggleNotify(s.id)}
+                    title="bildirim al"
+                  />
+                  <button type="button" className="ch-del" onClick={() => removeSource(idx)} title="sil">×</button>
+                </div>
+              );
+            })}
+          </div>
+          <div className="channel-actions">
+            <button type="button" onClick={() => addSource()}>+ Yeni Kaynak Ekle</button>
+            <button type="button" onClick={onSourcesReset} title="varsayılan listeyi geri yükle">↺ Sıfırla</button>
+          </div>
           <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-dim)' }}>
-            Bildirim sütunu boş bırakılırsa varsayılan son dakika kaynakları kullanılır.
-            Hepsini kapatırsanız bildirim almazsınız.
+            🔴 işaretliler üst şeritte "son dakika" olarak akar. ✓ = haber feed'inde görünür.
+            🔔 = işletim sistemi bildirimi gelir. Bildirim boşsa varsayılan 🔴 set kullanılır.
           </div>
         </section>
 

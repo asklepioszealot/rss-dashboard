@@ -1,12 +1,12 @@
 [
-  { "id": "hurriyet",   "name": "Hürriyet",       "url": "https://www.hurriyet.com.tr/rss/anasayfa",          "category": "genel" },
-  { "id": "ntv",        "name": "NTV",            "url": "https://www.ntv.com.tr/son-dakika.rss",             "category": "son-dakika" },
-  { "id": "cnnturk",    "name": "CNN Türk",       "url": "https://www.cnnturk.com/feed/rss/all/news",         "category": "genel" },
-  { "id": "sozcu",      "name": "Sözcü",          "url": "https://www.sozcu.com.tr/feeds-rss-category-sozcu", "category": "genel" },
-  { "id": "cumhuriyet", "name": "Cumhuriyet",     "url": "https://www.cumhuriyet.com.tr/rss/son_dakika.xml",  "category": "son-dakika" },
-  { "id": "bbcturkce",  "name": "BBC Türkçe",     "url": "https://feeds.bbci.co.uk/turkce/rss.xml",           "category": "dünya" },
-  { "id": "aa",         "name": "Anadolu Ajansı", "url": "https://www.aa.com.tr/tr/rss/default?cat=guncel",   "category": "genel" },
-  { "id": "evrensel",   "name": "Evrensel",       "url": "https://www.evrensel.net/rss/haber.xml",            "category": "genel" },
-  { "id": "diken",      "name": "Diken",          "url": "https://www.diken.com.tr/feed/",                    "category": "genel" },
-  { "id": "haberturk",  "name": "Habertürk",      "url": "https://www.haberturk.com/rss",                     "category": "genel" }
+  { "id": "hurriyet",   "name": "Hürriyet",       "url": "https://www.hurriyet.com.tr/rss/anasayfa",          "breaking": false },
+  { "id": "ntv",        "name": "NTV",            "url": "https://www.ntv.com.tr/son-dakika.rss",             "breaking": true  },
+  { "id": "cnnturk",    "name": "CNN Türk",       "url": "https://www.cnnturk.com/feed/rss/all/news",         "breaking": true  },
+  { "id": "sozcu",      "name": "Sözcü",          "url": "https://www.sozcu.com.tr/feeds-rss-category-sozcu", "breaking": false },
+  { "id": "cumhuriyet", "name": "Cumhuriyet",     "url": "https://www.cumhuriyet.com.tr/rss/son_dakika.xml",  "breaking": true  },
+  { "id": "bbcturkce",  "name": "BBC Türkçe",     "url": "https://feeds.bbci.co.uk/turkce/rss.xml",           "breaking": false },
+  { "id": "aa",         "name": "Anadolu Ajansı", "url": "https://www.aa.com.tr/tr/rss/default?cat=guncel",   "breaking": false },
+  { "id": "evrensel",   "name": "Evrensel",       "url": "https://www.evrensel.net/rss/haber.xml",            "breaking": false },
+  { "id": "diken",      "name": "Diken",          "url": "https://www.diken.com.tr/feed/",                    "breaking": false },
+  { "id": "haberturk",  "name": "Habertürk",      "url": "https://www.haberturk.com/rss",                     "breaking": true  }
 ]

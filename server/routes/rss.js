@@ -1,21 +1,17 @@
 import { Router } from 'express';
 import Parser from 'rss-parser';
 import NodeCache from 'node-cache';
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { getSources, onChange } from '../sourcesState.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
 const router = Router();
 const parser = new Parser({
   timeout: 8000,
   headers: { 'User-Agent': 'RSSDashboard/0.1 (+local)' },
 });
-const cache = new NodeCache({ stdTTL: 60, checkperiod: 30 });
+export const cache = new NodeCache({ stdTTL: 60, checkperiod: 30 });
 
-function loadSources() {
-  return JSON.parse(readFileSync(join(__dirname, '..', 'sources.json'), 'utf8'));
-}
+// Sources değişince cache temizle (yeni URL'ler hemen fetch'lensin)
+onChange(() => cache.flushAll());
 
 async function fetchFeed(source) {
   const cached = cache.get(source.id);
@@ -30,7 +26,6 @@ async function fetchFeed(source) {
       contentSnippet: it.contentSnippet || '',
       source: source.id,
       sourceName: source.name,
-      category: source.category || 'genel',
     }));
     cache.set(source.id, items);
     return items;
@@ -42,7 +37,7 @@ async function fetchFeed(source) {
 
 // GET /api/rss?sources=hurriyet,ntv
 router.get('/', async (req, res) => {
-  const all = loadSources();
+  const all = getSources();
   const filter = req.query.sources ? String(req.query.sources).split(',').filter(Boolean) : null;
   const targets = filter ? all.filter((s) => filter.includes(s.id)) : all;
   const results = await Promise.all(targets.map(fetchFeed));
