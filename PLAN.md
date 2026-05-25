@@ -69,12 +69,10 @@ Not: Vite proxy default `http://localhost:3737`'ye gider (Electron Express'i). T
 - ✅ **v0.1.1** — Settings → Sürüm: kurulu sürüm + GitHub Releases API ile güncelleme kontrolü + indir linki
 - ✅ GitHub'a push edildi: <https://github.com/asklepioszealot/rss-dashboard>
 - ✅ **v0.1.2 — Uygulama kontrolü:** Settings'e "🚪 Uygulamayı tamamen kapat" butonu (tray'den ayrı, UI'dan da çıkış mümkün) + kaynak bazlı bildirim filtresi (RSS Kaynakları satırlarında 🔔 toggle, `null`=hepsi semantiği `selectedSources` ile aynı). Main process polling artık IPC ile push'lanan listeyi kullanır; default fallback `BREAKING_SOURCES` korunur.
+- ✅ **v0.1.3 — m3u8 / HLS desteği:** `hls.js` ile `<video>` player (CNN Türk gibi YouTube embed reddeden kanallar için). `parseChannelSource` zaten m3u8 tanıyordu — yeni `HlsPlayer.jsx` component'i, `ChannelTile.jsx`'te `parsed.type==='hls'` branch'i, Safari native HLS + Chromium hls.js fallback, hata olunca "⚠ Yayın yüklenemedi" tile. Default `channels.json` dokunulmadı — kullanıcı UI'dan m3u8 URL girer.
 - ⏳ YouTube embed reddeden kanallar (CNN Türk vb. — Ciner Holding telif) için alternatif kaynak: m3u8 stream URL, yt-dlp ile direkt video URL extraction (v1.6 ile birlikte)
 
 ### v1.2.x — Bekleyen küçük işler (v1.3 öncesi park)
-
-**🔴 ACİL — bir sonraki oturum bununla başlasın:**
-- ⏳ **m3u8 / HLS canlı yayın desteği** — CNN Türk gibi YouTube embed reddeden kanallar için. `hls.js` + `<video>` element. `parseChannelSource` zaten m3u8'i tanıyor (type: 'hls'), `ChannelTile.jsx`'te `<iframe>` yerine HLS player render edilecek. Standalone bir iterasyon (v1.2.1).
 
 **Settings UX (kullanıcı şikayeti):**
 - ⏳ Header hiyerarşi tutarsız — `📺 Multi TV · Ayarlar` h2 kocaman, alt section başlıkları (RSS Kaynakları, Sürüm) küçük h3. Tutarlı typography lazım. Belki: accordion/tabs ile bölümleme (Multi TV / Haberler / Borsa / Sürüm sekmeleri)

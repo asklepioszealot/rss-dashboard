@@ -128,7 +128,7 @@ export default function Settings({ settings, onChange, onClose }) {
           <div className="channel-editor">
             {channels.map((c, idx) => {
               const parsed = parseChannelSource(c.source);
-              const ok = parsed.type === 'channel' || parsed.type === 'video';
+              const ok = parsed.type === 'channel' || parsed.type === 'video' || parsed.type === 'hls';
               const inGrid = idx < settings.gridSize;
               return (
                 <div
@@ -188,8 +188,8 @@ export default function Settings({ settings, onChange, onClose }) {
             </button>
           </div>
           <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-dim)' }}>
-            Kabul: <code>UC…</code> channel ID, 11 karakter video ID veya tam YouTube URL.
-            Soluk satırlar grid dışında. m3u8 desteği yakında.
+            Kabul: <code>UC…</code> channel ID, 11 karakter video ID, YouTube URL veya
+            doğrudan <code>.m3u8</code> HLS stream URL'i. Soluk satırlar grid dışında.
           </div>
         </section>
 

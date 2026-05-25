@@ -1,4 +1,5 @@
 import { buildEmbedUrl, parseChannelSource } from '../utils/channelUrl.js';
+import HlsPlayer from './HlsPlayer.jsx';
 
 export default function ChannelTile({ index, channel }) {
   if (!channel) {
@@ -12,10 +13,20 @@ export default function ChannelTile({ index, channel }) {
 
   // Geriye uyumluluk: eski channels.json `channelId` field'ı kullanıyordu
   const source = channel.source || channel.channelId || '';
+  const parsed = parseChannelSource(source);
+
+  if (parsed.type === 'hls') {
+    return (
+      <div className="tile">
+        <div className="tile-label">📡 #{index} · {channel.name}</div>
+        <HlsPlayer url={parsed.value} name={channel.name} />
+      </div>
+    );
+  }
+
   const src = buildEmbedUrl(source);
 
   if (!src) {
-    const parsed = parseChannelSource(source);
     return (
       <div className="tile">
         <div className="tile-label">YT #{index} · {channel.name || '?'}</div>

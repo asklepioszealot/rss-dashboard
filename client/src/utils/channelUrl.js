@@ -17,13 +17,9 @@ export function parseChannelSource(input) {
   const s = input.trim();
   if (!s) return { type: 'invalid', value: null, error: 'Boş kaynak' };
 
-  // HLS stream (.m3u8) — şimdilik tanı ama oynatma yok
+  // HLS stream (.m3u8)
   if (/\.m3u8(\?|$)/i.test(s)) {
-    return {
-      type: 'hls',
-      value: s,
-      error: 'HLS (m3u8) desteği yakında — şimdilik sadece YouTube',
-    };
+    return { type: 'hls', value: s };
   }
 
   // URL ise parse et
