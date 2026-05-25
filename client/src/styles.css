@@ -294,13 +294,40 @@ body {
 
 /* Source quick actions (Hepsi/Hiçbiri) */
 .source-actions {
-  display: flex; gap: 6px; margin-bottom: 6px;
+  display: flex; gap: 6px; margin-bottom: 6px; align-items: center;
+}
+.source-actions-label {
+  font-size: 11px; color: var(--text-dim); min-width: 70px;
 }
 .source-actions button {
   background: var(--bg-3); color: var(--text); border: 1px solid var(--border);
   padding: 3px 8px; cursor: pointer; font-size: 11px; flex: 1;
 }
 .source-actions button:hover { border-color: var(--accent); }
+
+/* Source row: feed checkbox solda, bildirim 🔔 sağda */
+.source-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 2px 0;
+}
+.source-feed { flex: 1; cursor: pointer; }
+.source-notify {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 12px; cursor: pointer;
+  padding: 2px 6px; border-radius: 3px;
+}
+.source-notify:hover { background: var(--bg-3); }
+
+/* Danger butonu — Uygulamayı kapat */
+.danger-btn {
+  background: var(--bg-3); color: var(--red-bright, #ff5050);
+  border: 1px solid var(--red, #aa2020);
+  padding: 8px 14px; cursor: pointer; font-size: 13px; font-weight: 600;
+  border-radius: 3px;
+}
+.danger-btn:hover {
+  background: var(--red, #aa2020); color: #fff;
+}
 
 /* Marquee tıklanabilir item'lar */
 .marquee-item {

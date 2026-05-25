@@ -10,6 +10,7 @@ const SETTINGS_KEY = 'rss-dashboard-settings';
 const defaultSettings = {
   gridSize: 9,
   selectedSources: null,   // null = implicit "hepsi"; array = tam olarak bunlar; [] = hiçbiri
+  notifySources: null,     // aynı semantik — null = default breaking set; [] = hiç bildirim
   selectedSymbols: null,
   customChannels: null,
   keyword: '',
@@ -39,6 +40,7 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    window.electron?.setNotifySources?.(settings.notifySources);
   }, [settings]);
 
   return (

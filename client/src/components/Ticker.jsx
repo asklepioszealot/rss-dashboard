@@ -9,7 +9,7 @@ function formatPrice(p) {
 
 export default function Ticker({ selectedSymbols = [] }) {
   const [items, setItems] = useState([]);
-  const symbolsKey = selectedSymbols.join(',');
+  const symbolsKey = (selectedSymbols || []).join(',');
 
   useEffect(() => {
     let alive = true;

@@ -1,7 +1,7 @@
 // Electron main process — CommonJS (server ESM'ı dynamic import ile yükler)
-const { app, BrowserWindow, Tray, Menu, nativeImage, shell } = require('electron');
+const { app, BrowserWindow, Tray, Menu, nativeImage, shell, ipcMain } = require('electron');
 const path = require('node:path');
-const { startNotificationPoller } = require('./notifications.cjs');
+const { startNotificationPoller, setNotifySources } = require('./notifications.cjs');
 
 const SERVER_PORT = 3737;
 const isDev = !app.isPackaged && process.env.NODE_ENV !== 'production';
@@ -148,6 +148,14 @@ async function bootstrap() {
   createWindow();
   createTray();
   startNotificationPoller(SERVER_PORT, () => mainWindow);
+
+  ipcMain.handle('app:quit', () => {
+    isQuitting = true;
+    app.quit();
+  });
+  ipcMain.handle('notify:set-sources', (_e, ids) => {
+    setNotifySources(ids);
+  });
 
   // --hidden flag ile başladıysa pencereyi gösterme (autostart için)
   if (process.argv.includes('--hidden')) {

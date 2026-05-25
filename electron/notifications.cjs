@@ -1,8 +1,8 @@
 // Native Windows bildirim — Electron main process'inde polling yapar,
-// son dakika kaynaklarında yeni item tespit edince Notification atar.
+// seçili kaynaklarda yeni item tespit edince Notification atar.
 const { Notification, shell } = require('electron');
 
-const BREAKING_SOURCES = 'ntv,cumhuriyet,haberturk,cnnturk';
+const DEFAULT_BREAKING_SOURCES = ['ntv', 'cumhuriyet', 'haberturk', 'cnnturk'];
 const POLL_MS = 60_000;
 const MAX_NOTIFY_PER_POLL = 3;
 const GUID_HISTORY_LIMIT = 200;
@@ -10,11 +10,32 @@ const GUID_HISTORY_LIMIT = 200;
 let knownGuids = new Set();
 let firstPoll = true;
 let timer = null;
+// null = renderer henüz push etmedi, default set kullan
+// [] = kullanıcı bilinçli "hiçbiri" seçti → bildirim yok
+// [ids...] = sadece bunlar
+let notifySources = null;
+
+function getActiveSources() {
+  if (notifySources === null) return DEFAULT_BREAKING_SOURCES;
+  return notifySources;
+}
+
+function setNotifySources(ids) {
+  notifySources = Array.isArray(ids) ? ids : null;
+  console.log(
+    `[notifications] sources updated: ${
+      notifySources === null ? 'default' : notifySources.join(',') || '(none)'
+    }`
+  );
+}
 
 async function pollOnce(port, getMainWindow) {
   try {
+    const active = getActiveSources();
+    if (active.length === 0) return; // kullanıcı hiçbiri dedi
+
     const r = await fetch(
-      `http://localhost:${port}/api/rss?sources=${BREAKING_SOURCES}`
+      `http://localhost:${port}/api/rss?sources=${active.join(',')}`
     );
     if (!r.ok) return;
     const data = await r.json();
@@ -79,4 +100,8 @@ function stopNotificationPoller() {
   }
 }
 
-module.exports = { startNotificationPoller, stopNotificationPoller };
+module.exports = {
+  startNotificationPoller,
+  stopNotificationPoller,
+  setNotifySources,
+};

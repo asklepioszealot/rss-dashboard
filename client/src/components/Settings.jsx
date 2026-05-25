@@ -76,6 +76,28 @@ export default function Settings({ settings, onChange, onClose }) {
     return list.includes(id);
   };
 
+  const DEFAULT_NOTIFY = ['ntv', 'cumhuriyet', 'haberturk', 'cnnturk'];
+
+  const toggleNotify = (id) => {
+    const current =
+      settings.notifySources == null ? DEFAULT_NOTIFY : settings.notifySources;
+    const next = current.includes(id)
+      ? current.filter((x) => x !== id)
+      : [...current, id];
+    onChange({ ...settings, notifySources: next });
+  };
+
+  const isNotifyOn = (id) => {
+    const list = settings.notifySources;
+    if (list == null) return DEFAULT_NOTIFY.includes(id);
+    return list.includes(id);
+  };
+
+  const quitApp = () => {
+    if (!window.confirm('Uygulama tamamen kapansın mı?')) return;
+    window.electron?.quit?.();
+  };
+
   return (
     <div className="settings-overlay" onClick={onClose}>
       <div className="settings-panel" onClick={(e) => e.stopPropagation()}>
@@ -177,32 +199,71 @@ export default function Settings({ settings, onChange, onClose }) {
             <div style={{ color: 'var(--text-dim)', fontSize: 12 }}>yükleniyor…</div>
           )}
           {sources.length > 0 && (
-            <div className="source-actions">
-              <button
-                type="button"
-                onClick={() => onChange({ ...settings, selectedSources: null })}
-              >
-                ✓ Hepsi
-              </button>
-              <button
-                type="button"
-                onClick={() => onChange({ ...settings, selectedSources: [] })}
-              >
-                × Hiçbiri
-              </button>
-            </div>
+            <>
+              <div className="source-actions">
+                <span className="source-actions-label">Feed:</span>
+                <button
+                  type="button"
+                  onClick={() => onChange({ ...settings, selectedSources: null })}
+                >
+                  ✓ Hepsi
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onChange({ ...settings, selectedSources: [] })}
+                >
+                  × Hiçbiri
+                </button>
+              </div>
+              <div className="source-actions">
+                <span className="source-actions-label">🔔 Bildirim:</span>
+                <button
+                  type="button"
+                  onClick={() => onChange({ ...settings, notifySources: sources.map((s) => s.id) })}
+                >
+                  ✓ Hepsi
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onChange({ ...settings, notifySources: [] })}
+                >
+                  × Hiçbiri
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onChange({ ...settings, notifySources: null })}
+                  title="sadece varsayılan son dakika kaynakları"
+                >
+                  ↺ Default
+                </button>
+              </div>
+            </>
           )}
           {sources.map((s) => (
-            <label key={s.id}>
-              <input
-                type="checkbox"
-                checked={isSourceOn(s.id)}
-                onChange={() => toggleSource(s.id)}
-              />
-              {s.name}{' '}
-              <span style={{ color: 'var(--text-dim)', fontSize: 11 }}>· {s.category}</span>
-            </label>
+            <div key={s.id} className="source-row">
+              <label className="source-feed">
+                <input
+                  type="checkbox"
+                  checked={isSourceOn(s.id)}
+                  onChange={() => toggleSource(s.id)}
+                />
+                {s.name}{' '}
+                <span style={{ color: 'var(--text-dim)', fontSize: 11 }}>· {s.category}</span>
+              </label>
+              <label className="source-notify" title="bu kaynaktan bildirim al">
+                <input
+                  type="checkbox"
+                  checked={isNotifyOn(s.id)}
+                  onChange={() => toggleNotify(s.id)}
+                />
+                🔔
+              </label>
+            </div>
           ))}
+          <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-dim)' }}>
+            Bildirim sütunu boş bırakılırsa varsayılan son dakika kaynakları kullanılır.
+            Hepsini kapatırsanız bildirim almazsınız.
+          </div>
         </section>
 
         <section>
@@ -217,6 +278,19 @@ export default function Settings({ settings, onChange, onClose }) {
           <h3>Sürüm</h3>
           <VersionTag />
         </section>
+
+        {window.electron?.isElectron && (
+          <section>
+            <h3>Uygulama</h3>
+            <button type="button" className="danger-btn" onClick={quitApp}>
+              🚪 Uygulamayı tamamen kapat
+            </button>
+            <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-dim)' }}>
+              Tepsi simgesinden de Çıkış'ı kullanabilirsiniz. Bu, Windows başlangıcında
+              otomatik açılma ayarını değiştirmez.
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );

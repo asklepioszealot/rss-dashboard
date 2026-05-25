@@ -68,13 +68,37 @@ Not: Vite proxy default `http://localhost:3737`'ye gider (Electron Express'i). T
 - ✅ Logo: turuncu kare üzerine RSS sembolü (icon.png 256x256 + tray.png 32x32)
 - ✅ **v0.1.1** — Settings → Sürüm: kurulu sürüm + GitHub Releases API ile güncelleme kontrolü + indir linki
 - ✅ GitHub'a push edildi: <https://github.com/asklepioszealot/rss-dashboard>
+- ✅ **v0.1.2 — Uygulama kontrolü:** Settings'e "🚪 Uygulamayı tamamen kapat" butonu (tray'den ayrı, UI'dan da çıkış mümkün) + kaynak bazlı bildirim filtresi (RSS Kaynakları satırlarında 🔔 toggle, `null`=hepsi semantiği `selectedSources` ile aynı). Main process polling artık IPC ile push'lanan listeyi kullanır; default fallback `BREAKING_SOURCES` korunur.
 - ⏳ YouTube embed reddeden kanallar (CNN Türk vb. — Ciner Holding telif) için alternatif kaynak: m3u8 stream URL, yt-dlp ile direkt video URL extraction (v1.6 ile birlikte)
 
-### v1.2.x — Bekleyen küçük işler
-- ⏳ README.md (kurulum, kullanım, ekran görüntüleri)
+### v1.2.x — Bekleyen küçük işler (v1.3 öncesi park)
+
+**🔴 ACİL — bir sonraki oturum bununla başlasın:**
+- ⏳ **m3u8 / HLS canlı yayın desteği** — CNN Türk gibi YouTube embed reddeden kanallar için. `hls.js` + `<video>` element. `parseChannelSource` zaten m3u8'i tanıyor (type: 'hls'), `ChannelTile.jsx`'te `<iframe>` yerine HLS player render edilecek. Standalone bir iterasyon (v1.2.1).
+
+**Settings UX (kullanıcı şikayeti):**
+- ⏳ Header hiyerarşi tutarsız — `📺 Multi TV · Ayarlar` h2 kocaman, alt section başlıkları (RSS Kaynakları, Sürüm) küçük h3. Tutarlı typography lazım. Belki: accordion/tabs ile bölümleme (Multi TV / Haberler / Borsa / Sürüm sekmeleri)
+- ⏳ VersionTag altına credit: **"by Ahmet Kara · asklepioszealot@proton.me"**
+
+**Ticker / Borsa:**
+- ⏳ Animasyon hızı arttırılmalı (şu an 80s, ~50-60s daha iyi)
+- ⏳ Borsa pariteleri UI'dan eklenebilmeli — backend zaten `?symbols=...` query'sini kabul ediyor, sadece Settings'te form gerek (kanal yöneticisi paterni)
+- ⏳ Borsa/döviz için RSS kaynağı keşfi (varsa entegre et)
+
+**RSS Kaynak Yönetimi (v1.5'ten öne çekildi, kullanıcı bu paketle bekliyor):**
+- ⏳ Manuel RSS kaynak ekleme UI (YouTube kanal yöneticisi gibi: ad + URL + sıra + sil + sıfırla)
+- ⏳ Auto-discover endpoint (`/api/discover?url=...` → `<link rel="alternate">` parse + fallback path'ler)
+- ⏳ Breaking flag per kaynak (marquee için bu flag'li olanlar)
+
+**Manuel yenileme:**
+- ⏳ ↺ refresh butonu — her panelin header'ında. Kullanıcı tereddütlü ("polling var"); polling 60s, breaking 30s — manuel refresh marjinal değer. Düşük öncelik.
+
+**Versioning / dağıtım:**
+- ⏳ README.md (kurulum + kullanım + ekran görüntüleri)
 - ⏳ LICENSE (MIT önerisi)
-- ⏳ GitHub Releases otomasyonu (electron-builder `publish` config + workflow)
-- ⏳ App içi otomatik güncelleme (electron-updater — manuel "kontrol et" yerine arka planda otomatik kontrol + tek tıkla kurulum)
+- ⏳ GitHub Releases otomasyonu (electron-builder `publish` config + GH Actions workflow)
+- ⏳ electron-updater entegrasyonu (mevcut "manuel kontrol et" arka plana çekilsin, tek tıkla kurulum)
+- Not: VersionTag + update checker UI'ı **v1.2'de eklendi** ✅ (kullanıcı listede tekrar yazmış olabilir — mevcut implementasyon manuel kontrol; yukarıdaki electron-updater bunu otomatikleştirir)
 
 ### v1.2 — RSS kaynak yönetimi (brainstorming notları)
 
