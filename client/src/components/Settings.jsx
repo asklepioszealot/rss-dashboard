@@ -23,9 +23,12 @@ function isValidUrl(s) {
 export default function Settings({
   settings,
   sources,
+  symbols,
   onChange,
   onSourcesChange,
   onSourcesReset,
+  onSymbolsChange,
+  onSymbolsReset,
   onClose,
 }) {
   const [defaultChannels, setDefaultChannels] = useState([]);
@@ -342,10 +345,92 @@ export default function Settings({
 
         <section>
           <h3>Borsa Sembolleri</h3>
-          <p style={{ fontSize: 11, color: 'var(--text-dim)', margin: 0 }}>
-            v1'de varsayılan set: USD/TRY, EUR/TRY, ALTIN, BIST 100, S&amp;P 500, BRENT, BTC.
-            Özelleştirme bir sonraki sürümde.
-          </p>
+          <div className="source-editor">
+            <div className="source-row source-row-header">
+              <span style={{ width: 32 }}></span>
+              <span style={{ flex: '1 1 90px' }}>etiket</span>
+              <span style={{ flex: '2 1 180px' }}>Yahoo sembolü</span>
+              <span style={{ width: 22 }}></span>
+            </div>
+            {symbols.length === 0 && (
+              <div style={{ color: 'var(--text-dim)', fontSize: 12, padding: '4px 0' }}>
+                yükleniyor…
+              </div>
+            )}
+            {symbols.map((s, idx) => (
+              <div className="source-row" key={`${s.symbol}-${idx}`}>
+                <div className="ch-move">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (idx === 0) return;
+                      const next = [...symbols];
+                      [next[idx], next[idx - 1]] = [next[idx - 1], next[idx]];
+                      onSymbolsChange(next);
+                    }}
+                    disabled={idx === 0}
+                    title="yukarı"
+                  >▲</button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (idx === symbols.length - 1) return;
+                      const next = [...symbols];
+                      [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
+                      onSymbolsChange(next);
+                    }}
+                    disabled={idx === symbols.length - 1}
+                    title="aşağı"
+                  >▼</button>
+                </div>
+                <input
+                  type="text"
+                  className="src-name"
+                  placeholder="etiket (örn. USD/TRY)"
+                  value={s.label}
+                  onChange={(e) =>
+                    onSymbolsChange(symbols.map((x, i) => (i === idx ? { ...x, label: e.target.value } : x)))
+                  }
+                />
+                <input
+                  type="text"
+                  className={`src-url ${s.symbol ? 'valid' : 'invalid'}`}
+                  placeholder="USDTRY=X, ^GSPC, BTC-USD…"
+                  value={s.symbol}
+                  onChange={(e) =>
+                    onSymbolsChange(symbols.map((x, i) => (i === idx ? { ...x, symbol: e.target.value } : x)))
+                  }
+                />
+                <button
+                  type="button"
+                  className="ch-del"
+                  onClick={() => onSymbolsChange(symbols.filter((_, i) => i !== idx))}
+                  title="sil"
+                >×</button>
+              </div>
+            ))}
+          </div>
+          <div className="channel-actions">
+            <button
+              type="button"
+              onClick={() => onSymbolsChange([...symbols, { label: '', symbol: '' }])}
+            >+ Yeni Sembol Ekle</button>
+            <button
+              type="button"
+              onClick={onSymbolsReset}
+              title="varsayılan listeyi geri yükle"
+            >↺ Sıfırla</button>
+          </div>
+          <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-dim)' }}>
+            Yahoo Finance sembol formatı: pariteler <code>USDTRY=X</code>, endeksler{' '}
+            <code>^GSPC</code> / <code>XU100.IS</code>, futures <code>GC=F</code>, kripto{' '}
+            <code>BTC-USD</code>. <a
+              href="https://finance.yahoo.com/lookup"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: 'var(--accent)' }}
+            >finance.yahoo.com/lookup</a> sembol aramak için.
+          </div>
         </section>
 
         <section>

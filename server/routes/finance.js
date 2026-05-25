@@ -40,6 +40,11 @@ async function fetchQuote(symbol) {
   }
 }
 
+// GET /api/finance/defaults — varsayılan sembol seti (client init için)
+router.get('/defaults', (_req, res) => {
+  res.json(DEFAULT_SYMBOLS);
+});
+
 // GET /api/finance?symbols=USDTRY=X,EURTRY=X
 router.get('/', async (req, res) => {
   const list = req.query.symbols

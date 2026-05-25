@@ -11,9 +11,9 @@ const defaultSettings = {
   gridSize: 9,
   selectedSources: null,   // null = implicit "hepsi"; array = tam olarak bunlar; [] = hiçbiri
   notifySources: null,     // aynı semantik — null = default breaking set; [] = hiç bildirim
-  selectedSymbols: null,
   customChannels: null,
   customSources: null,     // null = backend default; array = kullanıcı override
+  customSymbols: null,     // borsa sembolleri — null = backend default; array = override
   keyword: '',
   closeBehavior: 'tray',   // 'tray' = × tepsiye iner; 'quit' = × tamamen çıkış
 };
@@ -27,9 +27,8 @@ function loadSettings() {
     if (Array.isArray(stored.selectedSources) && stored.selectedSources.length === 0) {
       stored.selectedSources = null;
     }
-    if (Array.isArray(stored.selectedSymbols) && stored.selectedSymbols.length === 0) {
-      stored.selectedSymbols = null;
-    }
+    // Eski 'selectedSymbols' alanı kaldırıldı; varsa yok say (yeni: customSymbols)
+    delete stored.selectedSymbols;
     return { ...defaultSettings, ...stored };
   } catch {
     return defaultSettings;
@@ -52,6 +51,7 @@ export default function App() {
   const [settings, setSettings] = useState(loadSettings);
   const [showSettings, setShowSettings] = useState(false);
   const [sources, setSources] = useState([]);
+  const [symbols, setSymbols] = useState([]);
 
   // Mount: customSources varsa backend'e push + mirror; yoksa backend default'unu çek
   useEffect(() => {
@@ -61,6 +61,13 @@ export default function App() {
       );
     } else {
       fetch('/api/sources').then((r) => r.json()).then(setSources).catch(() => {});
+    }
+
+    // Symbols: customSymbols varsa kullan, yoksa backend default'unu çek
+    if (Array.isArray(settings.customSymbols) && settings.customSymbols.length > 0) {
+      setSymbols(settings.customSymbols);
+    } else {
+      fetch('/api/finance/defaults').then((r) => r.json()).then(setSymbols).catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -84,6 +91,22 @@ export default function App() {
       const r = await fetch('/api/sources');
       const data = await r.json();
       setSources(data);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const handleSymbolsChange = (next) => {
+    setSymbols(next);
+    setSettings((s) => ({ ...s, customSymbols: next }));
+  };
+
+  const handleSymbolsReset = async () => {
+    setSettings((s) => ({ ...s, customSymbols: null }));
+    try {
+      const r = await fetch('/api/finance/defaults');
+      const data = await r.json();
+      setSymbols(data);
     } catch {
       /* ignore */
     }
@@ -115,14 +138,17 @@ export default function App() {
           />
         </section>
       </main>
-      <Ticker selectedSymbols={settings.selectedSymbols} />
+      <Ticker symbols={symbols} />
       {showSettings && (
         <Settings
           settings={settings}
           sources={sources}
+          symbols={symbols}
           onChange={setSettings}
           onSourcesChange={handleSourcesChange}
           onSourcesReset={handleSourcesReset}
+          onSymbolsChange={handleSymbolsChange}
+          onSymbolsReset={handleSymbolsReset}
           onClose={() => setShowSettings(false)}
         />
       )}
