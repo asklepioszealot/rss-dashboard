@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import pkg from '../../package.json';
 
-const CURRENT_VERSION = '0.1.1';
+const CURRENT_VERSION = pkg.version;
 const REPO = 'asklepioszealot/rss-dashboard';
 
 function parseVer(v) {
