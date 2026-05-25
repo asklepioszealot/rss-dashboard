@@ -60,10 +60,20 @@ function createWindow() {
 
   // X tuşu davranışı: closeBehavior='tray' → tepsiye in; 'quit' → tamamen çık
   mainWindow.on('close', (e) => {
-    if (!isQuitting && closeBehavior === 'tray') {
+    if (isQuitting) return;
+    if (closeBehavior === 'tray') {
       e.preventDefault();
       mainWindow.hide();
+    } else {
+      // 'quit' → app'i de düşür; aksi halde tray ekranda kalır,
+      // tıklanınca destroyed mainWindow'a erişip hata atar
+      isQuitting = true;
+      app.quit();
     }
+  });
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
   });
 
   // Dış linkler tarayıcıda açılsın (haber link tıklaması)
@@ -93,13 +103,17 @@ function createTray() {
       {
         label: 'Aç / Göster',
         click: () => {
-          mainWindow?.show();
-          mainWindow?.focus();
+          if (!mainWindow || mainWindow.isDestroyed()) return;
+          mainWindow.show();
+          mainWindow.focus();
         },
       },
       {
         label: 'Gizle',
-        click: () => mainWindow?.hide(),
+        click: () => {
+          if (!mainWindow || mainWindow.isDestroyed()) return;
+          mainWindow.hide();
+        },
       },
       { type: 'separator' },
       {
@@ -129,13 +143,14 @@ function createTray() {
 
   refreshTrayMenu();
 
-  // Sol tık: pencere toggle
+  // Sol tık: pencere toggle (mainWindow destroyed ise no-op)
   tray.on('click', () => {
-    if (mainWindow?.isVisible()) {
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+    if (mainWindow.isVisible()) {
       mainWindow.hide();
     } else {
-      mainWindow?.show();
-      mainWindow?.focus();
+      mainWindow.show();
+      mainWindow.focus();
     }
   });
 }
@@ -191,6 +206,12 @@ app.on('before-quit', () => {
   isQuitting = true;
   try {
     serverInstance?.close();
+  } catch {
+    /* ignore */
+  }
+  try {
+    tray?.destroy();
+    tray = null;
   } catch {
     /* ignore */
   }

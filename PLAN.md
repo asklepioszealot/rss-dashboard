@@ -73,6 +73,7 @@ Not: Vite proxy default `http://localhost:3737`'ye gider (Electron Express'i). T
 - ✅ **v0.1.4 — UI küçük:** Settings 🔔 Bildirim satırından gereksiz "Default" butonu kaldırıldı.
 - ✅ **v0.1.5 — VersionTag fix:** `client/package.json`'dan dinamik version okur (önceki hardcoded '0.1.1' → her bump'ta unutuluyordu).
 - ✅ **v0.1.6 — Settings UX:** Settings → Uygulama bölümüne (a) Windows başlangıcında otomatik aç toggle (OS source-of-truth, tray menüsüyle senkron), (b) Kapatma (×) tepsiye in/tamamen çık toggle (`settings.closeBehavior`, IPC ile main'e push, `window.on('close')` handler bu flag'i okur). VersionTag altına "by Ahmet Kara" credit. `refreshTrayMenu` module-level'a çıkarıldı.
+- ✅ **v0.1.7 — Tray hot fix:** `closeBehavior='quit'` modunda × ile pencere kapanınca tray hayalet kalıyordu, tıklayınca destroyed `mainWindow`'a erişip "Object has been destroyed" hatası. Üç düzeltme: (1) close handler `quit` modda `app.quit()` çağırır, (2) `before-quit`'te `tray.destroy()`, (3) tray click/menu handler'larında `mainWindow.isDestroyed()` guard.
 - ⏳ YouTube embed reddeden kanallar (CNN Türk vb. — Ciner Holding telif) için alternatif kaynak: m3u8 stream URL, yt-dlp ile direkt video URL extraction (v1.6 ile birlikte)
 
 ### v1.2.x — Bekleyen küçük işler (v1.3 öncesi park)
