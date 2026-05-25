@@ -229,13 +229,6 @@ export default function Settings({ settings, onChange, onClose }) {
                 >
                   × Hiçbiri
                 </button>
-                <button
-                  type="button"
-                  onClick={() => onChange({ ...settings, notifySources: null })}
-                  title="sadece varsayılan son dakika kaynakları"
-                >
-                  ↺ Default
-                </button>
               </div>
             </>
           )}
