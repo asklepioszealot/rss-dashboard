@@ -10,6 +10,8 @@ let mainWindow = null;
 let tray = null;
 let serverInstance = null;
 let isQuitting = false;
+let closeBehavior = 'tray'; // 'tray' | 'quit'
+let refreshTrayMenu = null;
 
 // Single-instance kilidi — çift açılışı engelle (autostart + manuel açış çakışması)
 const gotLock = app.requestSingleInstanceLock();
@@ -56,9 +58,9 @@ function createWindow() {
     },
   });
 
-  // X tuşu = tepsiye in (gerçek çıkış sadece menüden veya before-quit'ten)
+  // X tuşu davranışı: closeBehavior='tray' → tepsiye in; 'quit' → tamamen çık
   mainWindow.on('close', (e) => {
-    if (!isQuitting) {
+    if (!isQuitting && closeBehavior === 'tray') {
       e.preventDefault();
       mainWindow.hide();
     }
@@ -86,7 +88,7 @@ function createTray() {
   tray = new Tray(icon);
   tray.setToolTip('RSS Dashboard');
 
-  const refreshMenu = () => {
+  refreshTrayMenu = () => {
     const menu = Menu.buildFromTemplate([
       {
         label: 'Aç / Göster',
@@ -110,7 +112,7 @@ function createTray() {
             path: process.execPath,
             args: ['--hidden'], // başlangıçta gizli aç
           });
-          refreshMenu(); // checked state'i yansıt
+          refreshTrayMenu(); // checked state'i yansıt
         },
       },
       { type: 'separator' },
@@ -125,7 +127,7 @@ function createTray() {
     tray.setContextMenu(menu);
   };
 
-  refreshMenu();
+  refreshTrayMenu();
 
   // Sol tık: pencere toggle
   tray.on('click', () => {
@@ -155,6 +157,18 @@ async function bootstrap() {
   });
   ipcMain.handle('notify:set-sources', (_e, ids) => {
     setNotifySources(ids);
+  });
+  ipcMain.handle('app:get-login', () => app.getLoginItemSettings().openAtLogin);
+  ipcMain.handle('app:set-login', (_e, open) => {
+    app.setLoginItemSettings({
+      openAtLogin: !!open,
+      path: process.execPath,
+      args: ['--hidden'],
+    });
+    refreshTrayMenu?.(); // tray checkbox state'i de senkron
+  });
+  ipcMain.handle('app:set-close-behavior', (_e, mode) => {
+    closeBehavior = mode === 'quit' ? 'quit' : 'tray';
   });
 
   // --hidden flag ile başladıysa pencereyi gösterme (autostart için)

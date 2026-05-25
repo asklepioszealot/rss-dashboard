@@ -14,6 +14,7 @@ const defaultSettings = {
   selectedSymbols: null,
   customChannels: null,
   keyword: '',
+  closeBehavior: 'tray',   // 'tray' = × tepsiye iner; 'quit' = × tamamen çıkış
 };
 
 function loadSettings() {
@@ -41,6 +42,7 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     window.electron?.setNotifySources?.(settings.notifySources);
+    window.electron?.setCloseBehavior?.(settings.closeBehavior);
   }, [settings]);
 
   return (

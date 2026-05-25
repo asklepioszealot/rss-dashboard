@@ -6,4 +6,7 @@ contextBridge.exposeInMainWorld('electron', {
   isElectron: true,
   quit: () => ipcRenderer.invoke('app:quit'),
   setNotifySources: (ids) => ipcRenderer.invoke('notify:set-sources', ids),
+  getLoginItemSettings: () => ipcRenderer.invoke('app:get-login'),
+  setLoginItemSettings: (open) => ipcRenderer.invoke('app:set-login', open),
+  setCloseBehavior: (mode) => ipcRenderer.invoke('app:set-close-behavior', mode),
 });

@@ -319,6 +319,16 @@ body {
 }
 .source-notify:hover { background: var(--bg-3); }
 
+/* Uygulama section toggle satırları */
+.app-toggle {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 0; cursor: pointer; font-size: 13px;
+}
+.app-toggle input[type="checkbox"] { margin: 0; }
+.app-toggle-hint {
+  font-size: 11px; color: var(--text-dim); margin-left: auto;
+}
+
 /* Danger butonu — Uygulamayı kapat */
 .danger-btn {
   background: var(--bg-3); color: var(--red-bright, #ff5050);
@@ -360,6 +370,11 @@ body {
   padding: 4px 10px; cursor: pointer; font-size: 11px;
 }
 .version-tag button:hover:not(:disabled) { border-color: var(--accent); }
+.version-credit {
+  font-size: 11px; color: var(--text-dim); margin-top: 4px;
+  padding-top: 6px; border-top: 1px solid var(--border);
+}
+.version-credit strong { color: var(--text); }
 .version-tag button:disabled { opacity: 0.5; cursor: default; }
 .version-tag .version-link {
   color: var(--text-dim); text-decoration: none; font-size: 11px;

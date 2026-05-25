@@ -70,6 +70,9 @@ Not: Vite proxy default `http://localhost:3737`'ye gider (Electron Express'i). T
 - ✅ GitHub'a push edildi: <https://github.com/asklepioszealot/rss-dashboard>
 - ✅ **v0.1.2 — Uygulama kontrolü:** Settings'e "🚪 Uygulamayı tamamen kapat" butonu (tray'den ayrı, UI'dan da çıkış mümkün) + kaynak bazlı bildirim filtresi (RSS Kaynakları satırlarında 🔔 toggle, `null`=hepsi semantiği `selectedSources` ile aynı). Main process polling artık IPC ile push'lanan listeyi kullanır; default fallback `BREAKING_SOURCES` korunur.
 - ✅ **v0.1.3 — m3u8 / HLS desteği:** `hls.js` ile `<video>` player (CNN Türk gibi YouTube embed reddeden kanallar için). `parseChannelSource` zaten m3u8 tanıyordu — yeni `HlsPlayer.jsx` component'i, `ChannelTile.jsx`'te `parsed.type==='hls'` branch'i, Safari native HLS + Chromium hls.js fallback, hata olunca "⚠ Yayın yüklenemedi" tile. Default `channels.json` dokunulmadı — kullanıcı UI'dan m3u8 URL girer.
+- ✅ **v0.1.4 — UI küçük:** Settings 🔔 Bildirim satırından gereksiz "Default" butonu kaldırıldı.
+- ✅ **v0.1.5 — VersionTag fix:** `client/package.json`'dan dinamik version okur (önceki hardcoded '0.1.1' → her bump'ta unutuluyordu).
+- ✅ **v0.1.6 — Settings UX:** Settings → Uygulama bölümüne (a) Windows başlangıcında otomatik aç toggle (OS source-of-truth, tray menüsüyle senkron), (b) Kapatma (×) tepsiye in/tamamen çık toggle (`settings.closeBehavior`, IPC ile main'e push, `window.on('close')` handler bu flag'i okur). VersionTag altına "by Ahmet Kara" credit. `refreshTrayMenu` module-level'a çıkarıldı.
 - ⏳ YouTube embed reddeden kanallar (CNN Türk vb. — Ciner Holding telif) için alternatif kaynak: m3u8 stream URL, yt-dlp ile direkt video URL extraction (v1.6 ile birlikte)
 
 ### v1.2.x — Bekleyen küçük işler (v1.3 öncesi park)

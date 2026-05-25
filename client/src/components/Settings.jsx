@@ -19,6 +19,7 @@ function normalize(list) {
 export default function Settings({ settings, onChange, onClose }) {
   const [defaultChannels, setDefaultChannels] = useState([]);
   const [sources, setSources] = useState([]);
+  const [autostart, setAutostart] = useState(false);
 
   useEffect(() => {
     fetch('/api/channels')
@@ -26,7 +27,13 @@ export default function Settings({ settings, onChange, onClose }) {
       .then((d) => setDefaultChannels(normalize(d)))
       .catch(() => {});
     fetch('/api/sources').then((r) => r.json()).then(setSources).catch(() => {});
+    window.electron?.getLoginItemSettings?.().then((v) => setAutostart(!!v));
   }, []);
+
+  const toggleAutostart = async (next) => {
+    setAutostart(next);
+    await window.electron?.setLoginItemSettings?.(next);
+  };
 
   const channels = settings.customChannels
     ? normalize(settings.customChannels)
@@ -275,13 +282,32 @@ export default function Settings({ settings, onChange, onClose }) {
         {window.electron?.isElectron && (
           <section>
             <h3>Uygulama</h3>
+            <label className="app-toggle">
+              <input
+                type="checkbox"
+                checked={autostart}
+                onChange={(e) => toggleAutostart(e.target.checked)}
+              />
+              Windows başlangıcında otomatik aç
+              <span className="app-toggle-hint">(uygulama gizli başlar, tray'de durur)</span>
+            </label>
+            <label className="app-toggle">
+              <input
+                type="checkbox"
+                checked={settings.closeBehavior !== 'quit'}
+                onChange={(e) =>
+                  onChange({
+                    ...settings,
+                    closeBehavior: e.target.checked ? 'tray' : 'quit',
+                  })
+                }
+              />
+              Kapatma (×) tuşunda tepsiye in
+              <span className="app-toggle-hint">(kapalıysa × = tamamen çıkış)</span>
+            </label>
             <button type="button" className="danger-btn" onClick={quitApp}>
               🚪 Uygulamayı tamamen kapat
             </button>
-            <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-dim)' }}>
-              Tepsi simgesinden de Çıkış'ı kullanabilirsiniz. Bu, Windows başlangıcında
-              otomatik açılma ayarını değiştirmez.
-            </div>
           </section>
         )}
       </div>

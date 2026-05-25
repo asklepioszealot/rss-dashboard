@@ -75,6 +75,7 @@ export default function VersionTag() {
       {state.status === 'error' && (
         <div className="version-error">⚠ {state.error}</div>
       )}
+      <div className="version-credit">by <strong>Ahmet Kara</strong></div>
     </div>
   );
 }
