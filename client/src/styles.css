@@ -9,6 +9,18 @@
   --red-bright: #ff2d2d;
   --green: #2ecc71;
   --accent: #ffb800;
+
+  /* Marquee (son dakika) — settings'ten override edilebilir */
+  --marquee-bg: var(--red);
+  --marquee-fg: #fff;
+  --marquee-duration: 90s;
+  --marquee-font: inherit;
+
+  /* Ticker (borsa) — settings'ten override edilebilir */
+  --ticker-bg: #000;
+  --ticker-fg: var(--text);
+  --ticker-duration: 55s;
+  --ticker-font: inherit;
 }
 
 * { box-sizing: border-box; }
@@ -143,8 +155,9 @@ body {
 
 /* Breaking marquee */
 .marquee {
-  background: var(--red);
-  color: #fff;
+  background: var(--marquee-bg);
+  color: var(--marquee-fg);
+  font-family: var(--marquee-font);
   display: flex; align-items: stretch;
   font-size: 13px; font-weight: 600;
   min-width: 0;
@@ -165,7 +178,7 @@ body {
 .marquee-track {
   display: inline-block;
   padding-left: 100%;
-  animation: marquee 90s linear infinite;
+  animation: marquee var(--marquee-duration) linear infinite;
   white-space: nowrap;
 }
 .marquee-track span { margin-right: 60px; }
@@ -176,7 +189,9 @@ body {
 
 /* Ticker */
 .ticker {
-  background: #000;
+  background: var(--ticker-bg);
+  color: var(--ticker-fg);
+  font-family: var(--ticker-font);
   border-top: 1px solid var(--border);
   overflow: hidden;
   white-space: nowrap;
@@ -187,7 +202,7 @@ body {
 .ticker-track {
   display: inline-block;
   padding-left: 100%;
-  animation: ticker 55s linear infinite;
+  animation: ticker var(--ticker-duration) linear infinite;
 }
 .ticker-item { margin-right: 36px; }
 .ticker-item .label { color: var(--text-dim); margin-right: 6px; }
@@ -323,6 +338,30 @@ body {
   margin-top: 6px; padding: 8px 10px;
   background: var(--bg-3); border: 1px solid var(--border); border-radius: 3px;
   font-size: 14px; color: var(--text-dim);
+}
+
+/* Strip editor — Şerit Ayarları (marquee/ticker mikro) */
+.strip-editor {
+  padding: 8px 10px; margin-bottom: 8px;
+  background: var(--bg-3); border: 1px solid var(--border); border-radius: 3px;
+}
+.strip-editor-label {
+  font-size: 12px; font-weight: 600; color: var(--text);
+  margin-bottom: 6px;
+}
+.strip-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 3px 0;
+}
+.strip-row-label {
+  font-size: 11px; color: var(--text-dim);
+  min-width: 80px;
+}
+.strip-speed {
+  width: 60px;
+  background: var(--bg); color: var(--text);
+  border: 1px solid var(--border); border-radius: 3px;
+  padding: 4px 6px; font-size: 12px; font-family: inherit;
 }
 
 /* Channel editor */

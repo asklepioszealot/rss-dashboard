@@ -5,7 +5,7 @@ import BreakingMarquee from './components/BreakingMarquee.jsx';
 import Ticker from './components/Ticker.jsx';
 import Settings from './components/Settings.jsx';
 import { applyTheme, DEFAULT_THEME_ID } from './themes.js';
-import { applyFont, DEFAULT_FONT_ID } from './fonts.js';
+import { applyFont, DEFAULT_FONT_ID, getFontStack } from './fonts.js';
 
 const SETTINGS_KEY = 'rss-dashboard-settings';
 
@@ -21,7 +21,21 @@ const defaultSettings = {
   theme: DEFAULT_THEME_ID, // 'classic' | 'broadcaster' | ... — themes.js
   customAccent: null,      // null = preset accent; "#hex" = override
   fontFamily: DEFAULT_FONT_ID, // fonts.js font id
+  marquee: { bg: null, fg: null, speed: null, font: null },
+  ticker:  { bg: null, fg: null, speed: null, font: null },
 };
+
+function applyStripStyles(prefix, opts) {
+  const root = document.documentElement;
+  const set = (key, val) => {
+    if (val == null || val === '') root.style.removeProperty(`--${prefix}-${key}`);
+    else root.style.setProperty(`--${prefix}-${key}`, val);
+  };
+  set('bg', opts?.bg);
+  set('fg', opts?.fg);
+  set('duration', opts?.speed != null ? `${opts.speed}s` : null);
+  set('font', opts?.font ? getFontStack(opts.font) : null);
+}
 
 function loadSettings() {
   try {
@@ -83,6 +97,8 @@ export default function App() {
     window.electron?.setCloseBehavior?.(settings.closeBehavior);
     applyTheme(settings.theme, settings.customAccent);
     applyFont(settings.fontFamily);
+    applyStripStyles('marquee', settings.marquee);
+    applyStripStyles('ticker', settings.ticker);
   }, [settings]);
 
   const handleSourcesChange = (next) => {

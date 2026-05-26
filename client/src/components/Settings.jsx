@@ -22,6 +22,84 @@ function isValidUrl(s) {
   return /^https?:\/\/.+/i.test(String(s || '').trim());
 }
 
+// Marquee/Ticker mikro ayar editörü
+function StripEditor({ label, value, defaults, onChange }) {
+  const patch = (key, v) => onChange({ ...value, [key]: v });
+
+  const bgValue = value.bg || (defaults.bg === 'preset' ? '#d32f2f' : defaults.bg);
+  const fgValue = value.fg || (defaults.fg === 'preset' ? '#e8e8e8' : defaults.fg);
+
+  return (
+    <div className="strip-editor">
+      <div className="strip-editor-label">{label}</div>
+
+      <div className="strip-row">
+        <span className="strip-row-label">Arka plan:</span>
+        <input
+          type="color"
+          className="color-picker"
+          value={bgValue}
+          onChange={(e) => patch('bg', e.target.value)}
+        />
+        <code className="color-picker-value">{value.bg || '—'}</code>
+        {value.bg && (
+          <button type="button" className="color-picker-reset" onClick={() => patch('bg', null)}>↺</button>
+        )}
+      </div>
+
+      <div className="strip-row">
+        <span className="strip-row-label">Yazı:</span>
+        <input
+          type="color"
+          className="color-picker"
+          value={fgValue}
+          onChange={(e) => patch('fg', e.target.value)}
+        />
+        <code className="color-picker-value">{value.fg || '—'}</code>
+        {value.fg && (
+          <button type="button" className="color-picker-reset" onClick={() => patch('fg', null)}>↺</button>
+        )}
+      </div>
+
+      <div className="strip-row">
+        <span className="strip-row-label">Hız (sn):</span>
+        <input
+          type="number"
+          min="20" max="180" step="5"
+          className="strip-speed"
+          value={value.speed ?? defaults.speed}
+          onChange={(e) => patch('speed', Number(e.target.value) || null)}
+        />
+        <span className="color-picker-value">varsayılan {defaults.speed}s</span>
+        {value.speed != null && (
+          <button type="button" className="color-picker-reset" onClick={() => patch('speed', null)}>↺</button>
+        )}
+      </div>
+
+      <div className="strip-row">
+        <span className="strip-row-label">Font:</span>
+        <select
+          className="font-picker"
+          value={value.font || ''}
+          onChange={(e) => patch('font', e.target.value || null)}
+        >
+          <option value="">Uygulamayla aynı</option>
+          <optgroup label="Sistem">
+            {FONTS.system.map((f) => (
+              <option key={f.id} value={f.id}>{f.label}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Web">
+            {FONTS.web.map((f) => (
+              <option key={f.id} value={f.id}>{f.label}</option>
+            ))}
+          </optgroup>
+        </select>
+      </div>
+    </div>
+  );
+}
+
 export default function Settings({
   settings,
   sources,
@@ -514,9 +592,24 @@ export default function Settings({
           </div>
 
           <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-dim)' }}>
-            Preset değiştirince özel renk sıfırlanır. Marquee/ticker ince ayarları
-            sonraki sürümlerde.
+            Preset değiştirince özel renk sıfırlanır.
           </div>
+        </section>
+
+        <section>
+          <h3>🎬 Şerit Ayarları</h3>
+          <StripEditor
+            label="Son Dakika (Marquee)"
+            value={settings.marquee}
+            defaults={{ bg: 'preset', fg: '#ffffff', speed: 90 }}
+            onChange={(v) => onChange({ ...settings, marquee: v })}
+          />
+          <StripEditor
+            label="Borsa (Ticker)"
+            value={settings.ticker}
+            defaults={{ bg: '#000000', fg: 'preset', speed: 55 }}
+            onChange={(v) => onChange({ ...settings, ticker: v })}
+          />
         </section>
 
         <section>
