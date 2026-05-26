@@ -2,6 +2,7 @@
 const { app, BrowserWindow, Tray, Menu, nativeImage, shell, ipcMain } = require('electron');
 const path = require('node:path');
 const { startNotificationPoller, setNotifySources } = require('./notifications.cjs');
+const { setupUpdater } = require('./updater.cjs');
 
 const SERVER_PORT = 3737;
 const isDev = !app.isPackaged && process.env.NODE_ENV !== 'production';
@@ -185,6 +186,16 @@ async function bootstrap() {
   ipcMain.handle('app:set-close-behavior', (_e, mode) => {
     closeBehavior = mode === 'quit' ? 'quit' : 'tray';
   });
+
+  // electron-updater — yarı-otomatik
+  const updater = setupUpdater(() => mainWindow);
+  ipcMain.handle('updater:check', () => updater.checkForUpdates());
+  ipcMain.handle('updater:download', () => updater.downloadUpdate());
+  ipcMain.handle('updater:quit-install', () => {
+    isQuitting = true;
+    updater.quitAndInstall();
+  });
+  ipcMain.handle('updater:is-active', () => updater.isActive);
 
   // --hidden flag ile başladıysa pencereyi gösterme (autostart için)
   if (process.argv.includes('--hidden')) {

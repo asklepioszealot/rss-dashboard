@@ -423,6 +423,44 @@ body {
   padding-top: 6px; border-top: 1px solid var(--border);
 }
 .version-credit strong { color: var(--text); }
+
+/* Updater */
+.version-action {
+  display: block; width: 100%; padding: 8px 12px;
+  background: var(--bg-3); color: var(--text);
+  border: 1px solid var(--border); cursor: pointer;
+  font-size: 13px; font-weight: 600; border-radius: 3px;
+  text-align: center;
+}
+.version-action:hover { border-color: var(--accent); }
+.version-action.primary {
+  background: var(--accent); color: #000; border-color: var(--accent);
+}
+.version-action.primary:hover { filter: brightness(1.1); }
+.version-progress {
+  position: relative; height: 24px;
+  background: var(--bg-3); border: 1px solid var(--border);
+  border-radius: 3px; overflow: hidden;
+}
+.version-progress-bar {
+  height: 100%; background: var(--accent);
+  transition: width 0.3s ease;
+}
+.version-progress-label {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: var(--text); font-weight: 600;
+  text-shadow: 0 0 4px rgba(0,0,0,0.7);
+}
+.version-error {
+  font-size: 11px; color: var(--red-bright);
+  padding: 4px 8px; background: rgba(211,47,47,0.1);
+  border-radius: 3px;
+}
+.version-note {
+  font-size: 11px; color: var(--text-dim);
+  font-style: italic;
+}
 .version-tag button:disabled { opacity: 0.5; cursor: default; }
 .version-tag .version-link {
   color: var(--text-dim); text-decoration: none; font-size: 11px;

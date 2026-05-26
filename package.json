@@ -1,6 +1,6 @@
 {
   "name": "rss-dashboard",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "private": true,
   "description": "Yayıncı tarzı RSS haber komuta merkezi (Electron masaüstü uygulaması)",
   "main": "electron/main.cjs",
@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
+    "electron-updater": "^6.8.3",
     "express": "^4.21.1",
     "node-cache": "^5.1.2",
     "rss-parser": "^3.13.0"
@@ -59,6 +60,13 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "RSS Dashboard"
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "asklepioszealot",
+        "repo": "rss-dashboard"
+      }
+    ]
   }
 }
