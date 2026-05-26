@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { parseChannelSource } from '../utils/channelUrl.js';
 import { THEMES } from '../themes.js';
+import { FONTS, DEFAULT_FONT_ID, getFontStack } from '../fonts.js';
 import VersionTag from './VersionTag.jsx';
 
 const GRID_OPTIONS = [4, 6, 9, 16, 18, 21, 25];
@@ -476,9 +477,45 @@ export default function Settings({
             )}
           </div>
 
+          <div className="font-picker-row">
+            <span className="color-picker-label">Yazı tipi:</span>
+            <select
+              className="font-picker"
+              value={settings.fontFamily || DEFAULT_FONT_ID}
+              onChange={(e) => onChange({ ...settings, fontFamily: e.target.value })}
+            >
+              <optgroup label="Sistem">
+                {FONTS.system.map((f) => (
+                  <option key={f.id} value={f.id}>{f.label}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Web">
+                {FONTS.web.map((f) => (
+                  <option key={f.id} value={f.id}>{f.label}</option>
+                ))}
+              </optgroup>
+            </select>
+            {settings.fontFamily && settings.fontFamily !== DEFAULT_FONT_ID && (
+              <button
+                type="button"
+                className="color-picker-reset"
+                onClick={() => onChange({ ...settings, fontFamily: DEFAULT_FONT_ID })}
+                title="varsayılan fonta dön"
+              >
+                ↺ Sıfırla
+              </button>
+            )}
+          </div>
+          <div
+            className="font-preview"
+            style={{ fontFamily: getFontStack(settings.fontFamily) }}
+          >
+            RSS Dashboard — Aa Bb Çç Ğğ Iı İi Şş 0123456789
+          </div>
+
           <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-dim)' }}>
-            Preset değiştirince özel renk sıfırlanır. Font ve marquee/ticker ince
-            ayarları sonraki sürümlerde.
+            Preset değiştirince özel renk sıfırlanır. Marquee/ticker ince ayarları
+            sonraki sürümlerde.
           </div>
         </section>
 

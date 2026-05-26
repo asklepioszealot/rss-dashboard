@@ -5,6 +5,7 @@ import BreakingMarquee from './components/BreakingMarquee.jsx';
 import Ticker from './components/Ticker.jsx';
 import Settings from './components/Settings.jsx';
 import { applyTheme, DEFAULT_THEME_ID } from './themes.js';
+import { applyFont, DEFAULT_FONT_ID } from './fonts.js';
 
 const SETTINGS_KEY = 'rss-dashboard-settings';
 
@@ -19,6 +20,7 @@ const defaultSettings = {
   closeBehavior: 'tray',   // 'tray' = × tepsiye iner; 'quit' = × tamamen çıkış
   theme: DEFAULT_THEME_ID, // 'classic' | 'broadcaster' | ... — themes.js
   customAccent: null,      // null = preset accent; "#hex" = override
+  fontFamily: DEFAULT_FONT_ID, // fonts.js font id
 };
 
 function loadSettings() {
@@ -80,6 +82,7 @@ export default function App() {
     window.electron?.setNotifySources?.(settings.notifySources);
     window.electron?.setCloseBehavior?.(settings.closeBehavior);
     applyTheme(settings.theme, settings.customAccent);
+    applyFont(settings.fontFamily);
   }, [settings]);
 
   const handleSourcesChange = (next) => {
