@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { parseChannelSource } from '../utils/channelUrl.js';
+import { THEMES } from '../themes.js';
 import VersionTag from './VersionTag.jsx';
 
-const GRID_OPTIONS = [4, 6, 9, 10, 13, 16, 18, 21, 25];
+const GRID_OPTIONS = [4, 6, 9, 16, 18, 21, 25];
 
 function makeId(prefix = 'ch') {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
@@ -430,6 +431,29 @@ export default function Settings({
               rel="noopener noreferrer"
               style={{ color: 'var(--accent)' }}
             >finance.yahoo.com/lookup</a> sembol aramak için.
+          </div>
+        </section>
+
+        <section>
+          <h3>🎨 Görünüm</h3>
+          <div className="theme-chips">
+            {THEMES.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                className={`theme-chip ${settings.theme === t.id ? 'active' : ''}`}
+                style={{ '--theme-accent': t.vars['--accent'] }}
+                onClick={() => onChange({ ...settings, theme: t.id })}
+                title={t.name}
+              >
+                <span className="theme-chip-dot" />
+                <span className="theme-chip-name">{t.name}</span>
+              </button>
+            ))}
+          </div>
+          <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-dim)' }}>
+            Daha fazla özelleştirme (özel renk, font, marquee/ticker ince ayarları)
+            sonraki sürümlerde.
           </div>
         </section>
 

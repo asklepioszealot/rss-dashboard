@@ -251,6 +251,36 @@ body {
 }
 .size-chip:hover:not(.active) { border-color: var(--accent); }
 
+/* Tema chip'leri — Görünüm section */
+.theme-chips {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+  margin-bottom: 4px;
+}
+.theme-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg-3); color: var(--text);
+  border: 1px solid var(--border); border-radius: 3px;
+  padding: 6px 8px; cursor: pointer; font-size: 12px;
+  text-align: left;
+}
+.theme-chip:hover:not(.active) { border-color: var(--theme-accent); }
+.theme-chip.active {
+  background: var(--theme-accent);
+  border-color: var(--theme-accent);
+  color: #000;
+  font-weight: 600;
+}
+.theme-chip-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--theme-accent);
+  border: 1px solid rgba(0,0,0,0.3);
+  flex-shrink: 0;
+}
+.theme-chip.active .theme-chip-dot {
+  background: #000; border-color: rgba(0,0,0,0.5);
+}
+.theme-chip-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
 /* Channel editor */
 .channel-editor {
   display: flex; flex-direction: column; gap: 4px;

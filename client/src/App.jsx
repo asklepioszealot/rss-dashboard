@@ -4,6 +4,7 @@ import NewsFeed from './components/NewsFeed.jsx';
 import BreakingMarquee from './components/BreakingMarquee.jsx';
 import Ticker from './components/Ticker.jsx';
 import Settings from './components/Settings.jsx';
+import { applyTheme, DEFAULT_THEME_ID } from './themes.js';
 
 const SETTINGS_KEY = 'rss-dashboard-settings';
 
@@ -16,6 +17,7 @@ const defaultSettings = {
   customSymbols: null,     // borsa sembolleri — null = backend default; array = override
   keyword: '',
   closeBehavior: 'tray',   // 'tray' = × tepsiye iner; 'quit' = × tamamen çıkış
+  theme: DEFAULT_THEME_ID, // 'classic' | 'broadcaster' | ... — themes.js
 };
 
 function loadSettings() {
@@ -76,6 +78,7 @@ export default function App() {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     window.electron?.setNotifySources?.(settings.notifySources);
     window.electron?.setCloseBehavior?.(settings.closeBehavior);
+    applyTheme(settings.theme);
   }, [settings]);
 
   const handleSourcesChange = (next) => {
