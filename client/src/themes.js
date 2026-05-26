@@ -115,9 +115,12 @@ export function getTheme(id) {
   return THEMES.find((t) => t.id === id) || THEMES[0];
 }
 
-export function applyTheme(id) {
+export function applyTheme(id, customAccent) {
   const theme = getTheme(id);
   const root = document.documentElement;
   Object.entries(theme.vars).forEach(([k, v]) => root.style.setProperty(k, v));
+  if (customAccent) {
+    root.style.setProperty('--accent', customAccent);
+  }
   root.setAttribute('data-theme', theme.id);
 }

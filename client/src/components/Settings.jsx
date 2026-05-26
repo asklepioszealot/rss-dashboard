@@ -443,7 +443,7 @@ export default function Settings({
                 type="button"
                 className={`theme-chip ${settings.theme === t.id ? 'active' : ''}`}
                 style={{ '--theme-accent': t.vars['--accent'] }}
-                onClick={() => onChange({ ...settings, theme: t.id })}
+                onClick={() => onChange({ ...settings, theme: t.id, customAccent: null })}
                 title={t.name}
               >
                 <span className="theme-chip-dot" />
@@ -451,9 +451,34 @@ export default function Settings({
               </button>
             ))}
           </div>
+
+          <div className="color-picker-row">
+            <span className="color-picker-label">Vurgu rengi:</span>
+            <input
+              type="color"
+              className="color-picker"
+              value={settings.customAccent || THEMES.find((t) => t.id === settings.theme)?.vars['--accent'] || '#ffb800'}
+              onChange={(e) => onChange({ ...settings, customAccent: e.target.value })}
+              title="vurgu rengini özelleştir"
+            />
+            <code className="color-picker-value">
+              {settings.customAccent || THEMES.find((t) => t.id === settings.theme)?.vars['--accent']}
+            </code>
+            {settings.customAccent && (
+              <button
+                type="button"
+                className="color-picker-reset"
+                onClick={() => onChange({ ...settings, customAccent: null })}
+                title="preset rengine dön"
+              >
+                ↺ Sıfırla
+              </button>
+            )}
+          </div>
+
           <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-dim)' }}>
-            Daha fazla özelleştirme (özel renk, font, marquee/ticker ince ayarları)
-            sonraki sürümlerde.
+            Preset değiştirince özel renk sıfırlanır. Font ve marquee/ticker ince
+            ayarları sonraki sürümlerde.
           </div>
         </section>
 

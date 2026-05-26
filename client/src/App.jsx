@@ -18,6 +18,7 @@ const defaultSettings = {
   keyword: '',
   closeBehavior: 'tray',   // 'tray' = × tepsiye iner; 'quit' = × tamamen çıkış
   theme: DEFAULT_THEME_ID, // 'classic' | 'broadcaster' | ... — themes.js
+  customAccent: null,      // null = preset accent; "#hex" = override
 };
 
 function loadSettings() {
@@ -78,7 +79,7 @@ export default function App() {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     window.electron?.setNotifySources?.(settings.notifySources);
     window.electron?.setCloseBehavior?.(settings.closeBehavior);
-    applyTheme(settings.theme);
+    applyTheme(settings.theme, settings.customAccent);
   }, [settings]);
 
   const handleSourcesChange = (next) => {
